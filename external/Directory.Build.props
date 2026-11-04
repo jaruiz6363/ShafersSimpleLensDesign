@@ -1,0 +1,5 @@
+<Project>
+  <!-- Stops MSBuild's upward search here, so Shafer's Simple Lens Design's Directory.Build.props
+       (single net8.0, implicit usings) does not reach the AberrationCalculator subtree, whose
+       projects set their own. Without it a fresh clone fails to build in Visual Studio. -->
+</Project>
