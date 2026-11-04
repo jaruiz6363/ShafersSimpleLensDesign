@@ -1,28 +1,73 @@
+# Build outputs
 bin/
 obj/
-*.user
+out/
+
+# Test output
+test-output/
+
+# IDE and editor files
 .vs/
-.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
 artifacts/
 
-# Written by the FixBinaries project, never committed: it names where OpticStudio is
-# installed and which release it is, and that is nobody else's business.
-ZemaxPaths.props
+# Rider
+.idea/
+*.sln.iml
 
-# Runtime logs. One got committed once; it named an unrelated private project.
-logs/
-*.log
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Machine-specific: it names where this user's OpticStudio macro folder is, which is
-# the same reason ZemaxPaths.props is not committed.
-.claude/settings.local.json
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Office lock files. Opening a document in Word or Excel drops a ~$name beside it;
-# it is a few hundred bytes of session state and it vanishes when the file is closed.
-~$*
+# User-specific files
+*.rsuser
+*.pubxml
+*.publishproj
 
-# The embedded Python that tools/setup-python.ps1 installs Optiland into.
-python-embed/
-__pycache__/
-ccl/buch7_asph.txt
-ccl/buch7.txt
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResult.xml
+coverage*.json
+coverage*.xml
+*.coverage
+*.coveragexml
+
+# Publish output
+publish/
+
+# JetBrains Rider
+*.sln.iml
+
+# Reference papers (publisher terms; cite, do not commit)
+*.pdf

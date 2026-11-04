@@ -1,0 +1,257 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ShafersSimpleLensDesign.ViewModels"
+        xmlns:views="using:ShafersSimpleLensDesign.Views"
+        x:Class="ShafersSimpleLensDesign.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        x:CompileBindings="False"
+        Title="{Binding Title}"
+        Icon="/Assets/icon.ico"
+        Width="1400" Height="900"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="E_xit" Click="ExitClick"/>
+            </MenuItem>
+            <MenuItem Header="_Search">
+                <MenuItem Header="_Run" InputGesture="F5" Command="{Binding RunCommand}"/>
+                <MenuItem Header="_Stop" Command="{Binding CancelCommand}"/>
+                <Separator/>
+                <MenuItem Header="_Export Top N" Click="ExportTopClick" IsEnabled="{Binding CanExport}"/>
+                <MenuItem Header="Export _Selected" Click="ExportSelectedClick" IsEnabled="{Binding CanExport}"/>
+                <MenuItem Header="Save _Table as CSV..." Click="SaveTableClick" IsEnabled="{Binding CanExport}"/>
+                <MenuItem Header="_Open Output Folder" Click="OpenFolderClick"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_User Guide" Click="UserGuideClick"/>
+                <MenuItem Header="_About" Click="AboutClick"/>
+            </MenuItem>
+        </Menu>
+
+        <Border DockPanel.Dock="Bottom" Background="#F0F0F0" Padding="8,4">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding StatusText}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                <ProgressBar Grid.Column="1" Width="240" Minimum="0" Maximum="100" Value="{Binding Progress}" Margin="8,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <Grid ColumnDefinitions="380,*">
+
+            <!-- Specification and settings -->
+            <ScrollViewer Grid.Column="0" Background="#FAFAFA">
+                <StackPanel Margin="12,4,12,12">
+
+                    <TextBlock Classes="group" Text="Lens"/>
+                    <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto">
+                        <TextBlock Classes="label" Text="Focal length (mm)"/>
+                        <TextBox Grid.Column="1" Text="{Binding FocalLength}"/>
+                        <TextBlock Classes="label" Grid.Row="1" Text="F-number"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FNumber}"/>
+                        <TextBlock Classes="label" Grid.Row="2" Text="Half field (deg)"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding HalfField}"/>
+                    </Grid>
+
+                    <TextBlock Classes="group" Text="Wavelengths (µm) and weights"/>
+                    <DataGrid ItemsSource="{Binding Wavelengths}" SelectedItem="{Binding SelectedWavelength}"
+                              AutoGenerateColumns="False" Height="150" CanUserSortColumns="False"
+                              GridLinesVisibility="All" BorderThickness="1" BorderBrush="#CCCCCC">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Wavelength (µm)" Binding="{Binding Micrometers}" Width="*"/>
+                            <DataGridTextColumn Header="Weight" Binding="{Binding Weight}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                        <Button Content="Add" Command="{Binding AddWavelengthCommand}"/>
+                        <Button Content="Remove" Command="{Binding RemoveWavelengthCommand}"/>
+                        <Button Content="Sort" Command="{Binding SortWavelengthsCommand}"/>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="180,*" Margin="0,6,0,0">
+                        <TextBlock Classes="label" Text="Primary (row number)"/>
+                        <TextBox Grid.Column="1" Text="{Binding PrimaryWavelength}"
+                                 ToolTip.Tip="The design wavelength: the layouts are found at it with model glasses, and it sets the focal length. Color is corrected over every wavelength, by its weight."/>
+                    </Grid>
+
+                    <TextBlock Classes="group" Text="Specifications"/>
+                    <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <TextBlock Classes="label" Text="Min back focus (mm)"/>
+                        <TextBox Grid.Column="1" Text="{Binding MinBackFocus}"
+                                 ToolTip.Tip="The air path from the last lens vertex to the image. A cover glass's thickness is not counted."/>
+                        <TextBlock Classes="label" Grid.Row="1" Text="Max length (mm)"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxLength}" ToolTip.Tip="First vertex to image."/>
+                        <TextBlock Classes="label" Grid.Row="2" Text="Max distortion (%)"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding MaxDistortion}" ToolTip.Tip="At full field, real chief ray against f tan(angle)."/>
+                        <CheckBox Grid.Row="3" Content="Max chief ray angle (deg)" IsChecked="{Binding LimitChiefAngle}"
+                                  ToolTip.Tip="Image-side telecentricity: the full-field chief ray meets the image within this angle of the axis, either way: −3 and 3 both mean within ±3°."/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding MaxChiefAngle}" IsEnabled="{Binding LimitChiefAngle}"/>
+                    </Grid>
+                    <CheckBox Content="Cover glass before the image" IsChecked="{Binding CoverGlass}" Margin="0,4,0,0"
+                              ToolTip.Tip="A plane window or filter between the lens and the sensor."/>
+                    <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto" IsEnabled="{Binding CoverGlass}">
+                        <TextBlock Classes="label" Text="Glass"/>
+                        <TextBox Grid.Column="1" Text="{Binding CoverGlassName}" ToolTip.Tip="CATALOG:NAME, e.g. SCHOTT:N-BK7"/>
+                        <TextBlock Classes="label" Grid.Row="1" Text="Thickness (mm)"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CoverThickness}"/>
+                        <TextBlock Classes="label" Grid.Row="2" Text="Gap to image (mm)"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CoverGap}" ToolTip.Tip="From the cover glass's back face to the image."/>
+                    </Grid>
+
+                    <TextBlock Classes="group" Text="Construction"/>
+                    <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Classes="label" Text="Fewest elements"/>
+                        <TextBox Grid.Column="1" Text="{Binding MinElements}"/>
+                        <TextBlock Classes="label" Grid.Row="1" Text="Most elements"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxElements}"
+                                 ToolTip.Tip="Every layout of air-spaced singlets is tried: 3·4^(N−1)·(N+1) for N elements. Five take about a minute; six, several."/>
+                        <TextBlock Classes="label" Grid.Row="2" Text="Model index, lowest"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding IndexMin}"/>
+                        <TextBlock Classes="label" Grid.Row="3" Text="Model index, highest"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding IndexMax}"
+                                 ToolTip.Tip="Above about 1.85 only dense flints remain, and the color cannot be corrected."/>
+                        <TextBlock Classes="label" Grid.Row="4" Text="Min center thickness (mm)"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MinCenter}"/>
+                        <TextBlock Classes="label" Grid.Row="5" Text="Min edge thickness (mm)"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding MinEdge}"/>
+                        <TextBlock Classes="label" Grid.Row="6" Text="Min air space (mm)"/>
+                        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding MinAir}" ToolTip.Tip="Between elements on the axis."/>
+                        <TextBlock Classes="label" Grid.Row="7" Text="Min air edge (mm)"/>
+                        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding MinAirEdge}"
+                                 ToolTip.Tip="Between elements at the rim of the wider of the two facing surfaces."/>
+                        <TextBlock Classes="label" Grid.Row="8" Text="Random starts per layout"/>
+                        <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Starts}"/>
+                    </Grid>
+                    <TextBlock Classes="note" Text="Every surface is concentric about the chief ray (C) or aplanatic (A): its radius follows from the rule, so every lens is free of coma and astigmatism. Thicknesses, air spaces and indices are optimized."/>
+
+                    <TextBlock Classes="group" Text="Color"/>
+                    <CheckBox Content="Real glasses, color corrected" IsChecked="{Binding CorrectColor}"
+                              ToolTip.Tip="One element is split by a buried surface concentric about the chief ray (C~, axial color), at most one other by a surface centered on the marginal ray's focus (M~, lateral color). With one wavelength there is no color to correct: each element takes the single real glass nearest its model index."/>
+                    <Grid ColumnDefinitions="180,*" IsEnabled="{Binding CorrectColor}">
+                        <TextBlock Classes="label" Text="Layouts to color"/>
+                        <TextBox Grid.Column="1" Text="{Binding ColorLayouts}"
+                                 ToolTip.Tip="The best N layouts with model glasses, and the best of each size, are given real glasses."/>
+                    </Grid>
+                    <CheckBox Content="Common glasses only" IsChecked="{Binding CommonGlasses}" IsEnabled="{Binding CorrectColor}"
+                              ToolTip.Tip="Glasses their maker marks preferred, or melts most often."/>
+                    <ItemsControl ItemsSource="{Binding Vendors}" IsEnabled="{Binding CorrectColor}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,0,10,0"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Classes="group" Text="Export"/>
+                    <Grid ColumnDefinitions="180,*">
+                        <TextBlock Classes="label" Text="Export top N"/>
+                        <TextBox Grid.Column="1" Text="{Binding ExportCount}"/>
+                    </Grid>
+                    <TextBlock Classes="label" Text="Output folder" Margin="0,6,0,2"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Text="{Binding OutputFolder}"/>
+                        <Button Grid.Column="1" Content="..." Margin="4,0,0,0" Click="BrowseOutputClick"/>
+                    </Grid>
+                    <TextBlock Classes="note" Text="Each lens is written as ZEMAX (.zmx), Code V (.seq), OSLO (.len), Optalix (.otx), Optiland (.json) and LensHH-LT (.lhlt)."/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Results -->
+            <DockPanel Grid.Column="1" Margin="10,8,10,8">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8">
+                    <Button Content="Run" Command="{Binding RunCommand}" FontWeight="SemiBold" Width="90" HorizontalContentAlignment="Center"/>
+                    <Button Content="Stop" Command="{Binding CancelCommand}" Width="90" HorizontalContentAlignment="Center"/>
+                    <Button Content="Export Top N" Click="ExportTopClick" IsEnabled="{Binding CanExport}"/>
+                    <Button Content="Export Selected" Click="ExportSelectedClick" IsEnabled="{Binding CanExport}"/>
+                    <Button Content="Save Table as CSV..." Click="SaveTableClick" IsEnabled="{Binding CanExport}"/>
+                    <Button Content="Open Output Folder" Click="OpenFolderClick"/>
+                    <CheckBox Content="Every glass choice" IsChecked="{Binding AllGlassChoices}" Margin="8,0,0,0"
+                              ToolTip.Tip="List every choice of real glasses found (the best 500), not only the best of each layout."/>
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding SummaryText}" Margin="0,8,0,6" FontSize="12" TextWrapping="Wrap" Foreground="#444444"/>
+                <Grid RowDefinitions="*,5,1.1*">
+                    <TabControl SelectedIndex="{Binding ResultsTab}" Padding="0,4,0,0">
+                        <TabItem Header="Real glasses (color corrected)" FontSize="14">
+                            <DataGrid x:Name="ColorGrid" ItemsSource="{Binding ColorResults}" SelectedItem="{Binding SelectedColor}"
+                                      AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended" CanUserSortColumns="True"
+                                      CanUserResizeColumns="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#CCCCCC" FontSize="12">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="50"/>
+                                    <DataGridTextColumn Header="Layout" Binding="{Binding Layout}" Width="150"/>
+                                    <DataGridTextColumn Header="El" Binding="{Binding Elements}" Width="42"/>
+                                    <DataGridTextColumn Header="RMS µm" Binding="{Binding Rms, StringFormat=\{0:F2\}}" Width="72"/>
+                                    <DataGridTextColumn Header="0" Binding="{Binding Rms0, StringFormat=\{0:F2\}}" Width="58"/>
+                                    <DataGridTextColumn Header="0.7" Binding="{Binding Rms07, StringFormat=\{0:F2\}}" Width="58"/>
+                                    <DataGridTextColumn Header="1" Binding="{Binding Rms1, StringFormat=\{0:F2\}}" Width="58"/>
+                                    <DataGridTextColumn Binding="{Binding RmsPerAiry, StringFormat=\{0:F2\}}" Width="76">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="÷Airy" ToolTip.Tip="The RMS spot as a multiple of the Airy radius, 1.22 λ N at the primary wavelength (shown above the table). Below 1, the spot is inside the Airy disk: diffraction limits the lens more than its aberrations."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Axial, StringFormat=\{0:F1\}}" Width="74">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Axial µm" ToolTip.Tip="Axial color, paraxial, µm: the shortest wavelength's focus less the longest's, along the axis. Negative: blue focuses nearer the lens."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Lateral, StringFormat=\{0:F2\}}" Width="80">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Lateral µm" ToolTip.Tip="Lateral color, paraxial, µm: at full field, the shortest wavelength's image height less the longest's, the color fringe at the edge of the image. Real rays at full field can give more."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Dist %" Binding="{Binding Distortion, StringFormat=\{0:F2\}}" Width="72"/>
+                                    <DataGridTextColumn Header="Length" Binding="{Binding Length, StringFormat=\{0:F1\}}" Width="80"/>
+                                    <DataGridTextColumn Header="BFL" Binding="{Binding BackFocus, StringFormat=\{0:F1\}}" Width="70"/>
+                                    <DataGridTextColumn Binding="{Binding ChiefAngle, StringFormat=\{0:F1\}}" Width="72">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="CRA°" ToolTip.Tip="The full-field chief ray's angle at the image: positive going away from the axis (exit pupil ahead of the image), negative going toward it."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Glasses" Binding="{Binding Glasses}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="Model glasses (design wavelength)" FontSize="14">
+                            <DataGrid x:Name="LayoutGrid" ItemsSource="{Binding LayoutResults}" SelectedItem="{Binding SelectedLayout}"
+                                      AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended" CanUserSortColumns="True"
+                                      CanUserResizeColumns="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#CCCCCC" FontSize="12">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="50"/>
+                                    <DataGridTextColumn Header="Layout" Binding="{Binding Layout}" Width="150"/>
+                                    <DataGridTextColumn Header="El" Binding="{Binding Elements}" Width="42"/>
+                                    <DataGridTextColumn Header="RMS µm" Binding="{Binding Rms, StringFormat=\{0:F2\}}" Width="72"/>
+                                    <DataGridTextColumn Header="0" Binding="{Binding Rms0, StringFormat=\{0:F2\}}" Width="58"/>
+                                    <DataGridTextColumn Header="0.7" Binding="{Binding Rms07, StringFormat=\{0:F2\}}" Width="58"/>
+                                    <DataGridTextColumn Header="1" Binding="{Binding Rms1, StringFormat=\{0:F2\}}" Width="58"/>
+                                    <DataGridTextColumn Binding="{Binding RmsPerAiry, StringFormat=\{0:F2\}}" Width="76">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="÷Airy" ToolTip.Tip="The RMS spot as a multiple of the Airy radius, 1.22 λ N at the primary wavelength (shown above the table). Below 1, the spot is inside the Airy disk: diffraction limits the lens more than its aberrations."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Dist %" Binding="{Binding Distortion, StringFormat=\{0:F2\}}" Width="72"/>
+                                    <DataGridTextColumn Header="Length" Binding="{Binding Length, StringFormat=\{0:F1\}}" Width="80"/>
+                                    <DataGridTextColumn Header="BFL" Binding="{Binding BackFocus, StringFormat=\{0:F1\}}" Width="70"/>
+                                    <DataGridTextColumn Binding="{Binding ChiefAngle, StringFormat=\{0:F1\}}" Width="72">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="CRA°" ToolTip.Tip="The full-field chief ray's angle at the image: positive going away from the axis (exit pupil ahead of the image), negative going toward it."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Indices" Binding="{Binding Indices}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                    </TabControl>
+                    <GridSplitter Grid.Row="1" ResizeDirection="Rows" Background="#DDDDDD"/>
+                    <Border Grid.Row="2" BorderThickness="1" BorderBrush="#CCCCCC">
+                        <DockPanel>
+                            <SelectableTextBlock DockPanel.Dock="Bottom" Text="{Binding SelectedText}" FontSize="12" Margin="8,4"
+                                                 TextWrapping="Wrap" Foreground="#444444"/>
+                            <views:LensView Drawing="{Binding Drawing}" ClipToBounds="True"/>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

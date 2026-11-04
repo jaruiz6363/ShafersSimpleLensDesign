@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ShafersSimpleLensDesign.Cli</RootNamespace>
+    <AssemblyName>shafer-lens</AssemblyName>
+    <!-- The search builds lenses on every core, each allocating many small arrays; with the workstation collector the
+         collections stop every thread and 16 cores gave a speed-up of 2.3, with server collection 8.9. -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ShafersSimpleLensDesign.Core\ShafersSimpleLensDesign.Core.csproj" />
+  </ItemGroup>
+</Project>

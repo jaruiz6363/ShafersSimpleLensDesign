@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>ShafersSimpleLensDesign.Core</RootNamespace>
+    <AssemblyName>ShafersSimpleLensDesign.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ShafersSimpleLensDesign.Tests" />
+  </ItemGroup>
+
+  <!-- The optics - lens model, glass catalogs, paraxial and exact traces, Seidel and Buchdahl coefficients, and the
+       writers for every lens format - are AberrationCalculator's, from external/AberrationCalculator. This library adds
+       only what is its own: building a lens from a surface order. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\AberrationCalculator\src\AberrationCalculator.Core\AberrationCalculator.Core.csproj" />
+    <ProjectReference Include="..\..\external\AberrationCalculator\src\AberrationCalculator.IO\AberrationCalculator.IO.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\external\AberrationCalculator\catalogs\Glass\*.AGF" CopyToOutputDirectory="PreserveNewest" LinkBase="catalogs\Glass" />
+  </ItemGroup>
+</Project>
