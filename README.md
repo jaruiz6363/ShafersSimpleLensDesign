@@ -4,7 +4,7 @@ Starting designs for lenses of air-spaced singlets, found in about a minute, by 
 for designing lenses", Proc. SPIE 237, 1980 International Lens Design Conference).
 
 Every surface is either **concentric about the chief ray** or **aplanatic for the marginal ray**, so every lens is free
-of coma and astigmatism by construction. The app tries every layout of one to five elements with model glasses, gives
+of coma and astigmatism by construction. The app tries every layout of one to six elements with model glasses, gives
 the best real catalog glasses, corrects their color with buried surfaces, and writes the lenses for OpticStudio (ZEMAX),
 Code V, OSLO, Optalix, Optiland and LensHH-LT.
 

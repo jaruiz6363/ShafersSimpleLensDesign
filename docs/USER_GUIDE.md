@@ -6,7 +6,7 @@ the chief ray or aplanatic for the marginal ray, so every lens it finds is free 
 The glasses are then chosen from the vendor catalogs, and the color is corrected by buried surfaces.
 
 You give the focal length, f-number, field and wavelengths, and the limits the lens must meet. The app tries every
-layout of one to five elements, ranks the results, draws them, and writes the ones you choose as lens files for
+layout of one to six elements, ranks the results, draws them, and writes the ones you choose as lens files for
 OpticStudio (ZEMAX), Code V, OSLO, Optalix, Optiland and LensHH-LT.
 
 ![The main window after a run](images/main-window.png)
